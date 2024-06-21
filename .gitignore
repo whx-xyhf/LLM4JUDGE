@@ -1,0 +1,4 @@
+client/node_modules
+client/dist
+server/static
+server/templates
