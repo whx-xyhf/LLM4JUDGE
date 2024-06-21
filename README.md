@@ -25,29 +25,29 @@ npm run lint
 See [Configuration Reference](https://cli.vuejs.org/config/).
 
 # server
-'''
+```
 cd ..
 cd server
-'''
+```
 
 # Creating a virtual environment
-'''
+```
 conda create -n LLM4JUDGE python=3.7
 conda activate LLM4JUDGE
-'''
+```
 
 # Setup
-'''
+```
 pip install -r requirements.txt
-'''
+```
 
 # makdir
-'''
+```
 makdir static
 makdir templates
-'''
+```
 
 # Run server
-'''
+```
 python server.py
-'''
+```
