@@ -33,10 +33,14 @@
                         <el-option v-for="item in allStatus" :key="item.key" :label="item" :value="item" />
                     </el-select>
                     <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter" style="margin-right:5px;margin-left: 5px;">
-                        Search
+                        筛选
                     </el-button>
                     <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-                        Add
+                        手动增加行
+                    </el-button>
+                    <el-input v-model="listQuery.limit" placeholder="请输入单次获取条数" style="width: 200px;margin-right:5px"/>
+                    <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-edit" @click="getTotalList">
+                        启动梳理
                     </el-button>
                 </div>
 
@@ -55,31 +59,37 @@
                         </template>
                     </el-table-column>
                     
-                    <el-table-column label="故障名称" width="110px" align="center">
+                    <el-table-column label="故障名称" width="120px" align="center">
                         <template slot-scope="{row}">
                         <span>{{ row.phenomenon }}</span>
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="判据" width="110px" align="center">
+                    <el-table-column label="判据" align="center" min-width="150px">
                         <template slot-scope="{row}">
                         <span>{{ row.condition }}</span>
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="规程" width="110px" align="center">
+                    <el-table-column label="规程" min-width="150px" align="center">
                         <template slot-scope="{row}">
                         <span>{{ row.rule }}</span>
                         </template>
                     </el-table-column>
 
-                    <el-table-column v-for="i in exampleCount" :key="'example'+i" :label="'案例'+i" width="110px" align="center">
+                    <el-table-column label="运行参数" min-width="150px" align="center">
+                        <template slot-scope="{row}">
+                        <span>{{ row.parameter }}</span>
+                        </template>
+                    </el-table-column>
+
+                    <el-table-column v-for="i in exampleCount" :key="'example'+i" :label="'案例'+i" min-width="150px" align="center">
                         <template slot-scope="{row}">
                         <span>{{ row['example'+i] }}</span>
                         </template>
                     </el-table-column>
 
-                    <el-table-column label="状态" class-name="status-col" width="100">
+                    <el-table-column label="状态" class-name="status-col" width="80">
                         <template slot-scope="{row}">
                         <el-tag :type="row.status | statusFilter">
                             {{ row.status }}
@@ -112,62 +122,65 @@
         </el-container>
 
         <el-dialog title="File Upload" :visible.sync="dialogFormVisible">
-            <el-form ref="fileForm" :rules="rules" :model="fileTemp" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-                <el-form-item label="规程文件：" prop="type">
+            <el-form ref="fileForm" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+                <el-form-item label="规程文件：">
                     <div class="upload-panel-type">
                         <el-upload
                             class="upload-demo"
-                            ref="upload"
-                            action="https://jsonplaceholder.typicode.com/posts/"
+                            ref="uploadGuicheng"
+                            :action="uploadUrl.guicheng"
                             :on-preview="handlePreview"
                             :on-remove="handleRemove"
-                            :file-list="fileList"
-                            :auto-upload="false">
+                            :file-list="guichengList"
+                            :on-success="handleSuccessGuicheng"
+                            :auto-upload="false"
+                            multiple>
                             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload('Guicheng')">上传到服务器</el-button>
+                            <div slot="tip" class="el-upload__tip">只能上传json文件</div>
                         </el-upload>
                     </div>
                 </el-form-item>
 
-                <el-form-item label="定制清测：" prop="type">
+                <el-form-item label="运行参数：">
                     <div class="upload-panel-type">
                         <el-upload
                             class="upload-demo"
-                            ref="upload"
-                            action="https://jsonplaceholder.typicode.com/posts/"
+                            ref="uploadValue"
+                            :action="uploadUrl.dingzhiqingce"
                             :on-preview="handlePreview"
                             :on-remove="handleRemove"
-                            :file-list="fileList"
-                            :auto-upload="false">
+                            :file-list="valueList"
+                            :auto-upload="false"
+                            multiple>
                             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload('Value')">上传到服务器</el-button>
+                            <div slot="tip" class="el-upload__tip">只能上传excel文件</div>
                         </el-upload>
                     </div>
                 </el-form-item>
 
-                <el-form-item label="判据案例：" prop="type">
+                <el-form-item label="判据案例：">
                     <div class="upload-panel-type">
                         <el-upload
                             class="upload-demo"
-                            ref="upload"
-                            action="https://jsonplaceholder.typicode.com/posts/"
+                            ref="uploadExample"
+                            :action="uploadUrl.example"
                             :on-preview="handlePreview"
                             :on-remove="handleRemove"
-                            :file-list="fileList"
-                            :auto-upload="false">
+                            :on-success="handleSuccessExample"
+                            :file-list="exampleList"
+                            :auto-upload="false"
+                            multiple>
                             <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload('Example')">上传到服务器</el-button>
+                            <div slot="tip" class="el-upload__tip">只能上传excel文件</div>
                         </el-upload>
                     </div>
                 </el-form-item>
               
             </el-form>
 
-            <div slot="footer" class="dialog-footer">
-            </div>
         </el-dialog>
 
         <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisibleUpdate">
@@ -176,12 +189,18 @@
             <el-input v-model="temp.phenomenon" @input="changeMessage()" />
             </el-form-item>
 
+            
+
             <el-form-item label="判据：" prop="condition">
             <el-input v-model="temp.condition" @input="changeMessage()" />
             </el-form-item>
 
             <el-form-item label="规程：" prop="rule">
             <el-input v-model="temp.rule" @input="changeMessage()" />
+            </el-form-item>
+
+            <el-form-item label="运行参数：">
+            <el-input v-model="temp.parameter" @input="changeMessage()" />
             </el-form-item>
 
             <el-form-item v-for="i in exampleCount" :label="'exam'+i+'：'" :key="'案例'+i" prop="rule">
@@ -227,16 +246,19 @@ export default {
     },
     data() {
         return {
+            uploadUrl:{guicheng:'/api/uploadGuicheng', dingzhiqingce:'/api/uploadValue', example:'/api/uploadExample'},
+            socket: null,
             tableKey: 0,
-            fileTemp:'',
+            fileTemp:[],
+            temp:[],
             listLoading: false,
             allStatus:['未校准', '已校准'],
             statusOptions: ['未校准', '已校准', '删除'],
             dialogFormVisible: false,//show 上传文件
             dialogFormVisibleUpdate:false,//show 更新表格
-            exampleCount:3,
-            list: null,
-            totalList: null,
+            exampleCount:0,
+            list: [],
+            totalList: [],
             dialogStatus: '',
             textMap: {
                 update: 'Edit',
@@ -255,39 +277,51 @@ export default {
                 phenomenon:'',
                 status:'',
             },
+            exampleList: [],
+            valueList: [],
+            guichengList:[],
         }
     },
     methods: {
         openUploadBox(){
-            // this.showUploadBox = true;
             this.dialogFormVisible = true;
         },
         clickFile() {
             document.getElementById("fileInput").click();
         },
-        test(){
-            this.$axios.post("/test", {"message":"hello"}).then(res=>{
-                if(res.data.code == 200){
-                    alert(res.data.data);
-                }
-            })
+        submitUpload(type) {
+            this.$refs['upload'+type].submit();
+            console.log(this.exampleList)
         },
-        uploadFile(e) {
-            const fileName = e.target.files[0].name.split('.')[0];
-            this.fileName = fileName;
-
-            if (window.FileReader) {
-                //创建读取文件的对象
-                var fr = new FileReader();
-                //以读取文件字符串的方式读取文件 但是不能直接读取file 
-                //因为文件的内容是存在file对象下面的files数组中的
-                //该方法结束后图片会以data:URL格式的字符串（base64编码）存储在fr对象的result中
-                fr.readAsDataURL(e.target.files[0]);
-                fr.onloadend = () => {
-
-                }
-            }
+        handleRemove(file, fileList) {
+            console.log(file, fileList);
         },
+        handlePreview(file) {
+            console.log(file);
+        },
+        handleSuccessExample(res, file, fileList){
+            this.exampleCount = fileList.length;
+            this.resetTemp()
+        },
+        handleSuccessGuicheng(res, file, fileList){
+            this.guichengList = fileList
+        },
+        // uploadFile(e) {
+        //     const fileName = e.target.files[0].name.split('.')[0];
+        //     this.fileName = fileName;
+
+        //     if (window.FileReader) {
+        //         //创建读取文件的对象
+        //         var fr = new FileReader();
+        //         //以读取文件字符串的方式读取文件 但是不能直接读取file 
+        //         //因为文件的内容是存在file对象下面的files数组中的
+        //         //该方法结束后图片会以data:URL格式的字符串（base64编码）存储在fr对象的result中
+        //         fr.readAsDataURL(e.target.files[0]);
+        //         fr.onloadend = () => {
+
+        //         }
+        //     }
+        // },
         getList(){
             if(this.listQuery.phenomenon == '' && this.listQuery.status == ''){
                 this.total = this.totalList.length;
@@ -322,10 +356,20 @@ export default {
             
         },
         getTotalList() {
-            this.$axios.post('./getResult',{}).then(response=>{
+            if(this.guichengList.length == 0){
+                alert("请首先上传规程文件！")
+                return;
+            }
+            this.$axios.post('./getResult',{limit: this.listQuery.limit, total:this.total}).then(response=>{
                 if(response.data.code == 200){
-                    this.totalList = response.data.data;
-                    this.getList();
+                    console.log(response.data.status)
+                    if(response.data.status){
+                        alert("规程已经梳理完！")
+                    }
+                    else{
+                        this.totalList = this.totalList.concat(response.data.data);
+                        this.getList();
+                    }
                 }
                 else{
                     alert("Error")
@@ -352,6 +396,7 @@ export default {
                 condition: '',
                 phenomenon: '',
                 rule: '',
+                parameter:'',
                 status: '未校准'
             }
             for(let i = 0 ; i < this.exampleCount; i++){
@@ -433,9 +478,9 @@ export default {
         handleDownload() {
             if (this.totalList.length > 0) {
                 import('@/vendor/Export2Excel').then(excel => {
-                    const tHeader = ['序号', '故障名称', '判据', '规程'];
+                    const tHeader = ['序号', '故障名称', '判据', '规程', '定值清测'];
                     
-                    const filterVal = ['id', 'phenomenon', 'condition', 'rule'];
+                    const filterVal = ['id', 'phenomenon', 'condition', 'rule', 'parameter'];
                     for(let i=0; i< this.exampleCount; i++){
                         tHeader.push('案例'+i);
                         filterVal.push('example'+i);
@@ -460,9 +505,10 @@ export default {
             }))
         },
     },
+
     mounted(){
-        this.getTotalList();
-        this.resetTemp()
+        // this.getTotalList();
+        
     },
     watch: {
 
