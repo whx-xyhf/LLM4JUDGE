@@ -356,11 +356,12 @@ export default {
             
         },
         getTotalList() {
-            if(this.guichengList.length == 0){
-                alert("请首先上传规程文件！")
-                return;
-            }
+            //if(this.guichengList.length == 0){
+                //alert("请首先上传规程文件！")
+                //return;
+            //}
             this.$axios.post('./getResult',{limit: this.listQuery.limit, total:this.total}).then(response=>{
+                console.log(response.data)
                 if(response.data.code == 200){
                     console.log(response.data.status)
                     if(response.data.status){

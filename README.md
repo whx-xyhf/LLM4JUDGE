@@ -43,11 +43,12 @@ pip install -r requirements.txt
 
 # makdir
 ```
-makdir static
-makdir templates
+mkdir static
+mkdir templates
 ```
 
 # Run server
 ```
 python server.py
 ```
+

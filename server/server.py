@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify, make_response, render_template
 from algorithm.chatGLM import get_glm_respones
 import openpyxl
 import json
+import numpy as np
 
 app = Flask(__name__)
 # app.config['COMPRESS_ALGORITHM'] = 'gzip'
@@ -39,6 +40,9 @@ def getResult():
 def uploadGuicheng():
     file = request.files.get('file')
     data = json.load(file)
+
+    data = data.get("chunks", [])
+    # print(chunks) #数据测试
     global_data['guicheng'].append(data)
     res = make_response(jsonify({'code': 200, 'data': ''}))
     return res
@@ -50,17 +54,32 @@ def uploadExample():
     data_sheet = data_excel[data_excel.sheetnames[0]]  # TODO 这是是读取第一个sheet的数据
     maxRows = data_sheet.max_row  # 行数
     maxColumns = data_sheet.max_column  # 列数
-    print(maxRows, maxColumns)
+    # print(maxRows, maxColumns
     
-    # for i in range(3, maxRows + 1):  # TODO 在这里不读取前面两行的str,只读取后面的数据
-    #     for j in range(1, maxColumns + 1):
-    #         column_list.append(data_sheet.cell(i, j).value)
-    # data = np.asarray(column_list).reshape(maxRows-2, maxColumns).astype(float) 
-    # global_data['dingzhiqingce'].append(data) #读取数据存在global_data里
+    column_list = []
+    for i in range(2, maxRows + 1):  # TODO 在这里不读取前面1行的str,只读取后面的数据
+        for j in range(1, maxColumns + 1):
+            column_list.append(data_sheet.cell(i, j).value)
+    data = np.asarray(column_list).reshape(maxRows-1, maxColumns).astype(str) 
+    global_data['example'].append(data) #读取数据存在global_data里
+    
+    #数据测试
+    # para = global_data['dingzhiqingce']
+    # print(para[0])
+    # print("---------------------------")
+    # for i,u in enumerate(para):
+    #     for j,v in enumerate(u):
+    #         for k,w in enumerate(v):
+    #             print(f"para[{i}{j}{k}] = {w}")
+    #             print()
+
+    # print("---------------------------")
+    
     res = make_response(jsonify({'code': 200, 'data': ''}))
     return res
 
 #此处同上，都是读excel文件,只是存在global_data里的不同位置
+###     dingzhiqingce
 @app.route("/api/uploadValue", methods=['POST'])
 def uploadValue():
     file = request.files.get('file')
@@ -68,14 +87,26 @@ def uploadValue():
     data_sheet = data_excel[data_excel.sheetnames[0]]  # TODO 这是是读取第一个sheet的数据
     maxRows = data_sheet.max_row  # 行数
     maxColumns = data_sheet.max_column  # 列数
-    print(maxRows, maxColumns)
+    # print(maxRows, maxColumns)
+
+    column_list = []
+    for i in range(1, maxRows + 1):  # TODO 
+        for j in range(1, maxColumns + 1):
+            column_list.append(data_sheet.cell(i, j).value)
     
-    # for i in range(3, maxRows + 1):  # TODO 在这里不读取前面两行的str,只读取后面的数据
-    #     for j in range(1, maxColumns + 1):
-    #         column_list.append(data_sheet.cell(i, j).value)
-    # data = np.asarray(column_list).reshape(maxRows-2, maxColumns).astype(float) 
-    # global_data['guicheng'].append(data) #读取数据存在global_data里
+    data = np.asarray(column_list).reshape(maxRows, maxColumns).astype(str) 
+    
+    name = file.filename
+    new_dict = {name: data}
+    # print(new_dict)
+
+    global_data['dingzhiqingce'].append(new_dict) #读取数据存在global_data里
+    # print(global_data)
+    # para = global_data['dingzhiqingce']
+    # print(para[0])
+
     res = make_response(jsonify({'code': 200, 'data': ''}))
+
     return res
 
 # @socketio.on('send_message')

@@ -1,118 +1,7 @@
-import os
-import openpyxl
 
 from difflib import SequenceMatcher
 def GetSimilarity(text1, text2):
     return SequenceMatcher(None, text1, text2).ratio()
-
-
-def MatchParameter(LStr) :
-    folder_path = 'data/TestTables'
-    # 获取指定文件夹下的所有文件
-    for filename in os.listdir(folder_path):
-        # 检查文件是否是Excel文件
-        if filename.endswith('.xlsx') or filename.endswith('.xls'):
-            # 拼接完整文件路径
-            file_path = os.path.join(folder_path, filename)
-        
-            # #测试当前路径
-            # print(file_path)
-
-            file = openpyxl.load_workbook(file_path)   #加载.xlsx
-            sheet = file.worksheets[0] #获取excel文件的第一个表单
-
-            rows = sheet.max_row #表格中的最大行数
-            syst = 2    #系统名称列
-            name = 4    #故障现象列
-
-            flag = 1
-
-            for i,s in enumerate(LStr) :
-                for j in range(rows):
-                    varSys = sheet.cell(row=j+1, column=syst).value
-                    varNa = sheet.cell(row=j+1, column=name).value
-                    #匹配设备名字
-                    if varSys is not None and GetSimilarity(LStr[i], varSys)>0.8: 
-                        
-                        #匹配现象名字
-                        for u,s2 in enumerate(LStr) :
-                            if varNa is not None and GetSimilarity(s2, varNa)>0.8:
-                                
-                                if flag == 1 :
-                                    print(f"匹配现象是：{varNa}")
-                                    flag-=1
-
-                                param = ""
-                                #运行参数
-                                for col in range(6,14):
-                                    if col < 13:
-
-                                        if sheet.cell(row=1, column=col).value is not None :
-                                            param = param + sheet.cell(row=1, column=col).value + '是'
-
-                                        if sheet.cell(row=j+1, column=col).value is not None :
-                                            param = param + str(sheet.cell(row=j+1, column=col).value ) + ';'
-                                        else:
-                                            param = param +'空' + '；'
-                                            
-                                    else:
-                                        if sheet.cell(row=1, column=col).value is not None :
-                                            param = param + sheet.cell(row=1, column=col).value + '是'
-
-                                        if sheet.cell(row=j+1, column=col).value is not None :
-                                            param = param + str(sheet.cell(row=j+1, column=col).value ) + ';'
-                                        else:
-                                            param = param +'空' + '。'
-                                return param
-                    
-    return '空'
-
-def MatchFactoryA(LStr):
-    file_path = 'data/factoryRef/ft_factory_data.xlsx'
-    # #测试当前路径
-    # print(file_path)
-
-    file = openpyxl.load_workbook(file_path)   #加载.xlsx
-    sheet = file.worksheets[0] #获取excel文件的第一个表单
-    rows = sheet.max_row #表格中的最大行数
-    sys = 2         #系统(设备)名称列
-    phnm = 8        #故障现象列
-    condition = 14  #判据条件列
-    for i,s in enumerate(LStr) :
-        for j in range(rows):
-            varSys = sheet.cell(row=j+1, column=sys).value
-            varPh = sheet.cell(row=j+1, column=phnm).value
-            #匹配设备名字
-            if varSys is not None and GetSimilarity(LStr[i], varSys)>0.8: 
-                #匹配现象名字
-                for u,s2 in enumerate(LStr) :
-                    if varPh is not None and GetSimilarity(s2, varPh)>0.8:
-                        return sheet.cell(row=j+1, column=condition).value   
-    return '空'
-
-def MatchFactoryB(LStr):
-    file_path = 'data/factoryRef/te_factory_data.xlsx'
-    # #测试当前路径
-    # print(file_path)
-
-    file = openpyxl.load_workbook(file_path)   #加载.xlsx
-    sheet = file.worksheets[0] #获取excel文件的第一个表单
-    rows = sheet.max_row #表格中的最大行数
-    sys = 2         #系统(设备)名称列
-    phnm = 8        #故障现象列
-    condition = 14  #判据条件列
-    for i,s in enumerate(LStr) :
-        for j in range(rows):
-            varSys = sheet.cell(row=j+1, column=sys).value
-            varPh = sheet.cell(row=j+1, column=phnm).value
-            #匹配设备名字
-            if varSys is not None and GetSimilarity(LStr[i], varSys)>0.8: 
-                #匹配现象名字
-                for u,s2 in enumerate(LStr) :
-                    if varPh is not None and GetSimilarity(s2, varPh)>0.8:
-                        return sheet.cell(row=j+1, column=condition).value   
-    return '空'
-
 
 
 #这个方法的作用是提取新工厂的故障现象的名称
@@ -236,6 +125,8 @@ def SplitData(chunk) :
     return text
 
         
-
+str1 = "汽泵前置泵出口或汽泵进口压力波动"
+str2 = "给水泵出口压力"
+print(GetSimilarity(str1, str2))
         
     
