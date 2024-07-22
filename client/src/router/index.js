@@ -1,15 +1,24 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
+import Layout from '@/layout'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path:'/',
-    name:'layout',
-    component: () => import('@/views/layout/index'),
-  }
+    path: '/',
+    component: Layout,
+    redirect: '/guichen',
+    children: [{
+      path: 'guichen',
+      component: (resolve) => require(['@/views/guichen/index'], resolve),
+    },
+    {
+      path: '/anli',
+      component: (resolve) => require(['@/views/anli/index'], resolve),
+    }]
+  },
+  
 ]
 
 const router = new VueRouter({

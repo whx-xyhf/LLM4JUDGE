@@ -1,125 +1,104 @@
 <template>
-    <el-container>
-        <el-header height="48px" style="box-shadow: 0px 2px 4px -1px rgb(0 0 0 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
-    background-color: #f5f5f5;padding: 0">
-            <div class="tool_bar_content">
-                <div style="font-weight:700">
-                    基于规程文件和样例判据数据的判据梳理系统
-                </div>
-                <div class="spacer"></div>
-                <div class="tool_bar__items">
-                    <el-button icon="el-icon-folder"
-                        style="height:47px;background:#f5f5f5;color:#000;border:none;transition: opacity .2s cubic-bezier(0.4, 0, 0.6, 1);"
-                        @click="openUploadBox">OPEN</el-button>
-                    <el-button icon="el-icon-download"
-                        style="height:47px;background:#f5f5f5;color:#000;border:none;transition: opacity .2s cubic-bezier(0.4, 0, 0.6, 1);"
-                        @click="handleDownload">SAVE</el-button>
-                    <input type="file" name="" id="fileInput" @change="uploadFile($event)" style="display:none">
-                </div>
-            </div>
-        </el-header>
-        <el-container>
-            <!-- <el-aside width="300px" style="height:calc(100vh - 48px);padding:5px 5px">
-                
-                
-            </el-aside> -->
-            <!-- #f0f2f5; -->
-            <el-main
-                style="height:calc(100vh - 48px); position:relative; width: calc(100% - 0px);padding:10px;box-sizing:border-box;background: white"
-                class="main">
-                <div class="filter-container" style="display:flex; padding:0 0 5px 0;">
-                    <el-input v-model="listQuery.phenomenon" placeholder="故障名称" style="width: 200px;margin-right:5px" class="filter-item" @keyup.enter.native="handleFilter" />
-                    <el-select v-model="listQuery.status" placeholder="状态" clearable class="filter-item" style="width: 130px;margin-right:5px">
-                        <el-option v-for="item in allStatus" :key="item.key" :label="item" :value="item" />
-                    </el-select>
-                    <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter" style="margin-right:5px;margin-left: 5px;">
-                        筛选
-                    </el-button>
-                    <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-                        手动增加行
-                    </el-button>
-                    <el-input v-model="listQuery.limit" placeholder="请输入单次获取条数" style="width: 200px;margin-right:5px"/>
-                    <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-edit" @click="getTotalList">
-                        启动梳理
-                    </el-button>
-                </div>
+    <div>
+        <div class="filter-container" style="display:flex; padding:0 0 5px 0;">
+            <input type="file" name="" id="fileInput" @change="uploadFile($event)" style="display:none">
+            <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-upload" @click="openUploadBox">
+                上传文件
+            </el-button>
+            <el-input v-model="listQuery.phenomenon" placeholder="故障名称" style="width: 200px;margin-right:5px" class="filter-item" @keyup.enter.native="handleFilter" />
+            <el-select v-model="listQuery.status" placeholder="状态" clearable class="filter-item" style="width: 130px;margin-right:5px">
+                <el-option v-for="item in allStatus" :key="item.key" :label="item" :value="item" />
+            </el-select>
+            <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter" style="margin-right:5px;margin-left: 5px;">
+                筛选
+            </el-button>
+            <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-edit" @click="handleCreate">
+                手动增加行
+            </el-button>
+            <el-input v-model="listQuery.limit" placeholder="请输入单次获取条数" style="width: 200px;margin-right:5px"/>
+            <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-edit" @click="getTotalList">
+                启动梳理
+            </el-button>
+            <el-button class="filter-item" style="margin-right: 5px;margin-left: 5px;" type="primary" icon="el-icon-download" @click="handleDownload">
+                导出判据
+            </el-button>
+        </div>
 
-                <el-table
-                    :key="tableKey"
-                    v-loading="listLoading"
-                    :data="list"
-                    border
-                    fit
-                    highlight-current-row
-                    style="width: 100%;"
-                    >
-                    <el-table-column label="序号" prop="id" align="center" width="80">
-                        <template slot-scope="{row}">
-                        <span>{{ row.id }}</span>
-                        </template>
-                    </el-table-column>
-                    
-                    <el-table-column label="故障名称" width="120px" align="center">
-                        <template slot-scope="{row}">
-                        <span>{{ row.phenomenon }}</span>
-                        </template>
-                    </el-table-column>
+        <el-table
+            :key="tableKey"
+            v-loading="listLoading"
+            :data="list"
+            border
+            fit
+            highlight-current-row
+            style="width: 100%;"
+            >
+            <el-table-column label="序号" prop="id" align="center" width="80">
+                <template slot-scope="{row}">
+                <span>{{ row.id }}</span>
+                </template>
+            </el-table-column>
+            
+            <el-table-column label="故障名称" width="120px" align="center">
+                <template slot-scope="{row}">
+                <span>{{ row.phenomenon }}</span>
+                </template>
+            </el-table-column>
 
-                    <el-table-column label="判据" align="center" min-width="150px">
-                        <template slot-scope="{row}">
-                        <span>{{ row.condition }}</span>
-                        </template>
-                    </el-table-column>
+            <el-table-column label="判据" align="center" min-width="150px">
+                <template slot-scope="{row}">
+                <span>{{ row.condition }}</span>
+                </template>
+            </el-table-column>
 
-                    <el-table-column label="规程" min-width="150px" align="center">
-                        <template slot-scope="{row}">
-                        <span>{{ row.rule }}</span>
-                        </template>
-                    </el-table-column>
+            <el-table-column label="规程" min-width="150px" align="center">
+                <template slot-scope="{row}">
+                <span>{{ row.rule }}</span>
+                </template>
+            </el-table-column>
 
-                    <el-table-column label="运行参数" min-width="150px" align="center">
-                        <template slot-scope="{row}">
-                        <span>{{ row.parameter }}</span>
-                        </template>
-                    </el-table-column>
+            <el-table-column label="运行参数" min-width="150px" align="center">
+                <template slot-scope="{row}">
+                <span>{{ row.parameter }}</span>
+                </template>
+            </el-table-column>
 
-                    <el-table-column v-for="i in exampleCount" :key="'example'+i" :label="'案例'+i" min-width="150px" align="center">
-                        <template slot-scope="{row}">
-                        <span>{{ row['example'+i] }}</span>
-                        </template>
-                    </el-table-column>
+            <el-table-column v-for="i in exampleCount" :key="'example'+i" :label="'案例'+i" min-width="150px" align="center">
+                <template slot-scope="{row}">
+                <span>{{ row['example'+i] }}</span>
+                </template>
+            </el-table-column>
 
-                    <el-table-column label="状态" class-name="status-col" width="80">
-                        <template slot-scope="{row}">
-                        <el-tag :type="row.status | statusFilter">
-                            {{ row.status }}
-                        </el-tag>
-                        </template>
-                    </el-table-column>
+            <el-table-column label="状态" class-name="status-col" width="80">
+                <template slot-scope="{row}">
+                <el-tag :type="row.status | statusFilter">
+                    {{ row.status }}
+                </el-tag>
+                </template>
+            </el-table-column>
 
-                    <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
-                        <template slot-scope="{row,$index}">
-                        <el-button type="primary" size="mini" @click="handleUpdate(row)">
-                            编辑
-                        </el-button>
-                        <el-button v-if="row.status!='已校准'" size="mini" type="success" @click="handleModifyStatus(row,'已校准')">
-                            校准
-                        </el-button>
-                        <el-button v-if="row.status!='未校准'" size="mini" @click="handleModifyStatus(row,'未校准')">
-                            打回
-                        </el-button>
-                        <el-button v-if="row.status!='删除'" size="mini" type="danger" @click="handleDelete(row,$index)">
-                            删除
-                        </el-button>
-                        </template>
-                    </el-table-column>
+            <el-table-column label="操作" align="center" width="230" class-name="small-padding fixed-width">
+                <template slot-scope="{row,$index}">
+                <el-button type="primary" size="mini" @click="handleUpdate(row)">
+                    编辑
+                </el-button>
+                <el-button v-if="row.status!='已校准'" size="mini" type="success" @click="handleModifyStatus(row,'已校准')">
+                    校准
+                </el-button>
+                <el-button v-if="row.status!='未校准'" size="mini" @click="handleModifyStatus(row,'未校准')">
+                    打回
+                </el-button>
+                <el-button v-if="row.status!='删除'" size="mini" type="danger" @click="handleDelete(row,$index)">
+                    删除
+                </el-button>
+                </template>
+            </el-table-column>
 
-                </el-table>
+        </el-table>
 
-                <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+        <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
 
-            </el-main>
-        </el-container>
+            
 
         <el-dialog title="File Upload" :visible.sync="dialogFormVisible">
             <el-form ref="fileForm" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
@@ -222,16 +201,16 @@
             Confirm
             </el-button>
         </div>
-    </el-dialog>
+        </el-dialog>
 
-    </el-container>
+    </div>
 </template>
 
 <script>
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 export default {
-    name: 'Layout',
+    name: 'Anli',
     components: { Pagination },
     directives: { waves },
     filters: {
